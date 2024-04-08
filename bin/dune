@@ -1,4 +1,4 @@
 (executable
  (public_name mv_rmrf)
  (name main)
- (libraries mv_rmrf eio_main))
+ (libraries mv_rmrf eio_main cmdliner))
