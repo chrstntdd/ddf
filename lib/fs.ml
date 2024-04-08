@@ -3,9 +3,9 @@ let rand_init = function
   | None -> Random.self_init ()
 
 let rand_bits () = Random.bits () |> Int.to_string
-let ( / ) = Eio.Path.( / )
 
 let get_os_tmpdir fs =
+  let ( / ) = Eio.Path.( / ) in
   let td = Filename.get_temp_dir_name () in
   fs / td
 
