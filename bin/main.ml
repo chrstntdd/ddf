@@ -14,7 +14,9 @@ let bool_prompt ~stdin file =
 let run_mv_rmrf env prompt items =
   let ( / ) = Eio.Path.( / ) in
   let cwd = Eio.Stdenv.cwd env in
-  let tmp_dir = Mv_rmrf.Fs.get_os_tmpdir env#fs / "mvrmrf" in
+  let tmp_dir = Mv_rmrf.Fs.get_os_tmpdir env#fs / "mv_rmrf" in
+  let () = Mv_rmrf.Fs.rand_init None in
+  let () = Eio.Path.mkdirs ~exists_ok:true ~perm:0o700 tmp_dir in
   let resources =
     items
     |> List.map (fun source_name ->
@@ -42,12 +44,8 @@ let run_mv_rmrf env prompt items =
              | false -> print_endline "Skipping...")
       |> ignore
 
-let run_main env =
+let run_cli env =
   let open Cmdliner in
-  let ( / ) = Eio.Path.( / ) in
-  let () = Mv_rmrf.Fs.rand_init None in
-  let tmp_dir = Mv_rmrf.Fs.get_os_tmpdir env#fs / "mv_rmrf" in
-  let () = Eio.Path.mkdirs ~exists_ok:true ~perm:0o700 tmp_dir in
   let runnit = run_mv_rmrf env in
   let files = Arg.(non_empty & pos_all file [] & info [] ~docv:"FILE") in
 
@@ -89,4 +87,4 @@ let run_main env =
 
   exit (Cmd.eval cmd)
 
-let () = Eio_main.run @@ run_main
+let () = Eio_main.run @@ run_cli
