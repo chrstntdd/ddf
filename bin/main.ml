@@ -1,12 +1,5 @@
 type prompt = Always | Never
-
-let prompt_str = function Always -> "always" | Never -> "never"
-
-type 'a movable_item = {
-  source_name : string;
-  dest_name : string;
-  dest_path : 'a Eio.Path.t;
-}
+type 'a movable_item = { source_name : string; dest_path : 'a Eio.Path.t }
 
 let bool_prompt ~stdin file =
   let buf = Eio.Buf_read.of_flow stdin ~initial_size:100 ~max_size:1_000_000 in
@@ -27,7 +20,6 @@ let run_mv_rmrf env prompt items =
     |> List.map (fun source_name ->
            let dest_name = source_name ^ "_" ^ Mv_rmrf.Fs.rand_bits () in
            {
-             dest_name;
              dest_path = tmp_dir / dest_name;
              source_name = Filename.basename source_name;
            })
@@ -49,14 +41,9 @@ let run_mv_rmrf env prompt items =
              | true -> run_moves [ res ] |> ignore
              | false -> print_endline "Skipping...")
       |> ignore
-(* | _ -> *)
-(*     resources *)
-(*     |> List.iter (fun entry -> *)
-(*            print_endline (entry.dest_path |> Eio.Path.native_exn)) *)
-
-open Cmdliner
 
 let run_main env =
+  let open Cmdliner in
   let ( / ) = Eio.Path.( / ) in
   let () = Mv_rmrf.Fs.rand_init None in
   let tmp_dir = Mv_rmrf.Fs.get_os_tmpdir env#fs / "mv_rmrf" in

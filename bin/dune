@@ -2,5 +2,4 @@
  (public_name mv_rmrf)
  (name main)
  ; Allow looser unused fieds (for prototyping)
- (flags :standard -w -37-69-27-34-32)
  (libraries mv_rmrf eio_main cmdliner))
