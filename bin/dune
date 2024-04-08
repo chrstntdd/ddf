@@ -1,5 +1,4 @@
 (executable
  (public_name mv_rmrf)
  (name main)
- ; Allow looser unused fieds (for prototyping)
  (libraries mv_rmrf eio_main cmdliner))
