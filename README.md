@@ -24,7 +24,29 @@ I wanted to try out Ocaml 5 and with the new stable `eio` library. Also, clearin
    ```sh
    dune build bin
    ```
-
+5. Verify `main.exe`
+    ```sh
+    eza --tree ./_build/default
+    ```
+    ```sh
+    ./_build/default
+    ├── bin
+    │  ├── main.exe # 👈
+    │  ├── main.ml
+    │  └── main.mli
+    ├── ddf.dune-package
+    ├── ddf.install
+    ├── ddf.opam
+    ├── lib
+    │  ├── ddf.a
+    │  ├── ddf.cma
+    │  ├── ddf.cmxa
+    │  ├── ddf.cmxs
+    │  ├── ddf.ml-gen
+    │  └── fs.ml
+    ├── META.ddf
+    └── README.md
+    ```
 For production, be sure to include the release flag:
 
 ```sh
