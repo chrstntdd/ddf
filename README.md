@@ -2,7 +2,8 @@
 
 > `d`iscard `d`irectories `f`ast
 
-> [!IMPORTANT] > `mv`s directories and files to os tmpdir for quick cleanup
+> [!IMPORTANT] 
+> `mv`s directories and files to os tmpdir for quick cleanup
 
 ## Why
 
