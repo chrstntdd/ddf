@@ -27,7 +27,7 @@ jobs:
           cache-prefix: ${{matrix.ocaml-compiler}}-${{matrix.os}}
 
       - name: Install deps from lockfile
-        run: opam install . --deps-only --locked -y
+        run: opam install ./lib.opam.locked ./bin.opam.locked ./mv_rmrf.opam --deps-only --locked -y
 
       - name: Build CLI bin
         run: opam exec -- dune build --profile release bin
