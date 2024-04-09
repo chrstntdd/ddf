@@ -7,9 +7,9 @@
 (source
  (github username/reponame))
 
-(authors "Author Name")
+(authors "Christian Todd")
 
-(maintainers "Maintainer Name")
+(maintainers "Christian Todd")
 
 (license LICENSE)
 
@@ -18,7 +18,7 @@
 (package
  (name ddf)
  (synopsis "discard directories quickly")
- (description "A longer description")
+ (description "`mv`s directories and files to os tmpdir for quick cleanup")
  (depends ocaml dune)
  (tags
   (topics "to describe" your project)))
