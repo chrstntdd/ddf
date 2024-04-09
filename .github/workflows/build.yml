@@ -1,4 +1,3 @@
-
 name: Development CI
 
 on: [push]
@@ -11,9 +10,9 @@ jobs:
       fail-fast: false
       matrix:
         os:
-          - macos-latest
+          # - macos-latest
+          # - windows-latest
           - ubuntu-latest
-          - windows-latest
         ocaml-compiler:
           - "5.1.1"
     steps:
@@ -25,7 +24,7 @@ jobs:
           ocaml-compiler: ${{ matrix.ocaml-compiler }}
 
       - name: Install deps from lockfile
-        run: opam install . --deps-only --locked
+        run: opam install ./lib.opam.locked ./bin.opam.locked ./mv_rmrf.opam --deps-only --locked -y
 
       - name: Build CLI bin
         run: opam exec -- dune build --profile release bin
@@ -35,4 +34,3 @@ jobs:
         with:
           name: ${{matrix.ocaml-compiler}}-${{matrix.os}}
           path: ./_build/default/bin/main.exe
-

@@ -1,12 +1,11 @@
 opam-version: "2.0"
-name: "mv_rmrf"
+name: "bin"
 version: "~dev"
-synopsis: "A short synopsis"
+synopsis: "CLI for mv-rmrf"
 description: "A longer description"
-maintainer: "Maintainer Name"
-authors: "Author Name"
-license: "LICENSE"
-tags: ["topics" "to describe" "your" "project"]
+maintainer: "world"
+authors: "A. N. Other"
+license: "MIT"
 homepage: "https://github.com/username/reponame"
 doc: "https://url/to/documentation"
 bug-reports: "https://github.com/username/reponame/issues"
@@ -16,24 +15,9 @@ depends: [
   "base-nnp" {= "base"}
   "base-threads" {= "base"}
   "base-unix" {= "base"}
-  "dune" {= "3.15.0"}
+  "cmdliner" {= "1.2.0"}
   "ocaml" {= "5.1.1"}
   "ocaml-base-compiler" {= "5.1.1"}
   "ocaml-config" {= "3"}
   "ocaml-options-vanilla" {= "1"}
 ]
-build: [
-  ["dune" "subst"] {dev}
-  [
-    "dune"
-    "build"
-    "-p"
-    name
-    "-j"
-    jobs
-    "@install"
-    "@runtest" {with-test}
-    "@doc" {with-doc}
-  ]
-]
-dev-repo: "git+https://github.com/username/reponame.git"
