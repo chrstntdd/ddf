@@ -1,6 +1,6 @@
 (lang dune 3.15)
 
-(name mv_rmrf)
+(name ddf)
 
 (generate_opam_files true)
 
@@ -16,8 +16,8 @@
 (documentation https://url/to/documentation)
 
 (package
- (name mv_rmrf)
- (synopsis "A short synopsis")
+ (name ddf)
+ (synopsis "discard directories quickly")
  (description "A longer description")
  (depends ocaml dune)
  (tags

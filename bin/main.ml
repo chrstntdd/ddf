@@ -2,25 +2,27 @@ type prompt = Always | Never
 type 'a movable_item = { source_name : string; dest_path : 'a Eio.Path.t }
 
 let bool_prompt ~stdin file =
-  let buf = Eio.Buf_read.of_flow stdin ~initial_size:100 ~max_size:1_000_000 in
+  let buf = Eio.Buf_read.of_flow stdin ~initial_size:2 ~max_size:10 in
   let () = print_endline file in
   let () = print_endline "Should this be removed? [y/n]" in
   let rl () =
     let line = Eio.Buf_read.line buf in
-    match line with "y" | "Y" -> true | _ -> false
+    let processed_line = String.trim line in
+    let user_input = String.lowercase_ascii processed_line in
+    match user_input with "y" -> true | _ -> false
   in
-  rl ()
+  try rl () with Eio.Buf_read.Buffer_limit_exceeded -> false
 
-let run_mv_rmrf env prompt items =
+let run_ddf env prompt items =
   let ( / ) = Eio.Path.( / ) in
   let cwd = Eio.Stdenv.cwd env in
-  let tmp_dir = Mv_rmrf.Fs.get_os_tmpdir env#fs / "mv_rmrf" in
-  let () = Mv_rmrf.Fs.rand_init None in
+  let tmp_dir = Ddf.Fs.get_os_tmpdir env#fs / "ddf" in
+  let () = Ddf.Fs.rand_init None in
   let () = Eio.Path.mkdirs ~exists_ok:true ~perm:0o700 tmp_dir in
   let resources =
     items
     |> List.map (fun source_name ->
-           let dest_name = source_name ^ "_" ^ Mv_rmrf.Fs.rand_bits () in
+           let dest_name = source_name ^ "_" ^ Ddf.Fs.rand_bits () in
            {
              dest_path = tmp_dir / dest_name;
              source_name = Filename.basename source_name;
@@ -28,8 +30,7 @@ let run_mv_rmrf env prompt items =
   in
   let run_moves =
     List.map (fun entry ->
-        Mv_rmrf.Fs.safe_remove ~src:(cwd / entry.source_name)
-          ~dest:entry.dest_path
+        Ddf.Fs.safe_remove ~src:(cwd / entry.source_name) ~dest:entry.dest_path
         |> Result.get_ok)
   in
   match prompt with
@@ -46,7 +47,7 @@ let run_mv_rmrf env prompt items =
 
 let run_cli env =
   let open Cmdliner in
-  let runnit = run_mv_rmrf env in
+  let runnit = run_ddf env in
   let files = Arg.(non_empty & pos_all file [] & info [] ~docv:"FILE") in
 
   let prompt =
@@ -76,12 +77,12 @@ let run_cli env =
         `Noblank;
         `Pre "$(mname) $(b,./-foo)";
         `S Manpage.s_bugs;
-        `P "Report bugs to mv_rmrf_bugs.nineteen384@passmail.net.";
+        `P "Report bugs to ddf.helpful326@passfwd.com";
         `S Manpage.s_see_also;
         `P "$(b,rmdir)(1), $(b,unlink)(2)";
       ]
     in
-    let info = Cmd.info "mv_rmrf " ~version:"0.0.0" ~doc ~man in
+    let info = Cmd.info "ddf" ~version:"0.0.1" ~doc ~man in
     Cmd.v info Term.(const runnit $ prompt $ files)
   in
 
