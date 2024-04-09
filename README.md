@@ -1,19 +1,52 @@
-# mv_rmrf
+# `ddf`
 
-> A CLI utility similar to `rm -rf` that runs faster by moving files to the OS's tmp directory.
+> `d`iscard `d`irectories `f`ast
+
+> [!IMPORTANT] 
+> `mv`s directories and files to os tmpdir for quick cleanup
+
+## Why
+
+I wanted to try out Ocaml 5 and with the new stable `eio` library. Also, clearing out `node_modules` and other build artifacts with `rm -rf` takes too long for me.
 
 ## Setup
 
 1. [Install `opam`](https://opam.ocaml.org/doc/Install.html)
-2. Install dependencies from the lockfile
+2. Create a local switch with `opam`
    ```sh
-   opam install ./lib.opam.locked ./bin.opam.locked ./mv_rmrf.opam --deps-only --locked
+   opam switch create . --locked --deps-only
    ```
-3. Build with `dune`
+3. Install dependencies from the lockfiles.
+   ```sh
+   opam install ./lib.opam.locked ./bin.opam.locked ./ddf.opam --deps-only --locked
+   ```
+4. Build with `dune`
    ```sh
    dune build bin
    ```
-
+5. Verify `main.exe`
+    ```sh
+    eza --tree ./_build/default
+    ```
+    ```sh
+    ./_build/default
+    ├── bin
+    │  ├── main.exe # 👈
+    │  ├── main.ml
+    │  └── main.mli
+    ├── ddf.dune-package
+    ├── ddf.install
+    ├── ddf.opam
+    ├── lib
+    │  ├── ddf.a
+    │  ├── ddf.cma
+    │  ├── ddf.cmxa
+    │  ├── ddf.cmxs
+    │  ├── ddf.ml-gen
+    │  └── fs.ml
+    ├── META.ddf
+    └── README.md
+    ```
 For production, be sure to include the release flag:
 
 ```sh
@@ -41,3 +74,15 @@ or with `dune`
 ```sh
 dune exec/bin/main.exe -- --help
 ```
+
+If you are consuming the binary from the build artifacts, ensure you allow the `main.exe` to be executable:
+
+```sh
+chmod +x main.exe
+```
+
+## Prior art
+
+- [`rip`](https://github.com/nivekuil/rip)
+- [`mvf`](https://github.com/chrstntdd/mvf)
+  The first prototype of this same functionality in ReasonML without the nice CLI. If I can ever get the build tooling right, it would be nice to have Pastel back in the mix somehow. Maybe a single module for rendering CLI output prompts in ReasonML with native jsx? 🤔

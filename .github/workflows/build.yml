@@ -27,7 +27,7 @@ jobs:
           cache-prefix: ${{matrix.ocaml-compiler}}-${{matrix.os}}
 
       - name: Install deps from lockfile
-        run: opam install ./lib.opam.locked ./bin.opam.locked ./mv_rmrf.opam --deps-only --locked -y
+        run: opam install ./lib.opam.locked ./bin.opam.locked ./ddf.opam --deps-only --locked -y
 
       - name: Build CLI bin
         run: opam exec -- dune build --profile release bin
@@ -35,5 +35,5 @@ jobs:
       - name: Upload CLI bin
         uses: actions/upload-artifact@v4
         with:
-          name: ${{matrix.ocaml-compiler}}-${{matrix.os}}
+          name: ddf-${{matrix.ocaml-compiler}}-${{matrix.os}}
           path: ./_build/default/bin/main.exe

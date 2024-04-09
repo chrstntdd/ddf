@@ -1,8 +1,7 @@
 opam-version: "2.0"
-synopsis: "CLI for mv-rmrf"
-description: "A longer description"
-maintainer: ["world"]
-authors: ["A. N. Other"]
+synopsis: "CLI for ddf"
+maintainer: ["Christian Todd"]
+authors: ["Christian Todd"]
 license: "MIT"
 homepage: "https://github.com/username/reponame"
 doc: "https://url/to/documentation"

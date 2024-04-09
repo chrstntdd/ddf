@@ -1,24 +1,24 @@
 (lang dune 3.15)
 
-(name mv_rmrf)
+(name ddf)
 
 (generate_opam_files true)
 
 (source
  (github username/reponame))
 
-(authors "Author Name")
+(authors "Christian Todd")
 
-(maintainers "Maintainer Name")
+(maintainers "Christian Todd")
 
 (license LICENSE)
 
 (documentation https://url/to/documentation)
 
 (package
- (name mv_rmrf)
- (synopsis "A short synopsis")
- (description "A longer description")
+ (name ddf)
+ (synopsis "discard directories quickly")
+ (description "`mv`s directories and files to os tmpdir for quick cleanup")
  (depends ocaml dune)
  (tags
   (topics "to describe" your project)))
