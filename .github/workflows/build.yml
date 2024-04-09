@@ -3,15 +3,15 @@ name: Development CI
 on: [push]
 
 jobs:
-  convention-checks:
+  build:
     runs-on: ubuntu-latest
 
     strategy:
       fail-fast: false
       matrix:
         os:
-          # - macos-latest
-          # - windows-latest
+          - macos-latest
+          - windows-latest
           - ubuntu-latest
         ocaml-compiler:
           - "5.1.1"
