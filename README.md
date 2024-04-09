@@ -7,7 +7,7 @@
 1. [Install `opam`](https://opam.ocaml.org/doc/Install.html)
 2. Install dependencies from the lockfile
    ```sh
-   opam install . --deps-only --locked
+   opam install ./lib.opam.locked ./bin.opam.locked ./mv_rmrf.opam --deps-only --locked
    ```
 3. Build with `dune`
    ```sh

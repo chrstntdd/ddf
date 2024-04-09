@@ -16,7 +16,7 @@ depends: [
   "base-nnp" {= "base"}
   "base-threads" {= "base"}
   "base-unix" {= "base"}
-  "dune" {= "3.14.0"}
+  "dune" {= "3.15.0"}
   "ocaml" {= "5.1.1"}
   "ocaml-base-compiler" {= "5.1.1"}
   "ocaml-config" {= "3"}
