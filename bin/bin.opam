@@ -8,6 +8,6 @@ homepage: "https://github.com/username/reponame"
 doc: "https://url/to/documentation"
 bug-reports: "https://github.com/username/reponame/issues"
 depends: [
-  "eio_main" {"1.0" & dev}
+  "eio_main" 
   "cmdliner"
 ]
