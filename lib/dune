@@ -1,3 +1,4 @@
 (library
- (name ddf)
+ (name lib)
+ (package lib)
  (libraries eio_main))

@@ -16,13 +16,13 @@ let bool_prompt ~stdin file =
 let run_ddf env prompt items =
   let ( / ) = Eio.Path.( / ) in
   let cwd = Eio.Stdenv.cwd env in
-  let tmp_dir = Ddf.Fs.get_os_tmpdir env#fs / "ddf" in
-  let () = Ddf.Fs.rand_init None in
+  let tmp_dir = Lib.Fs.get_os_tmpdir env#fs / "ddf" in
+  let () = Lib.Fs.rand_init None in
   let () = Eio.Path.mkdirs ~exists_ok:true ~perm:0o700 tmp_dir in
   let resources =
     items
     |> List.map (fun source_name ->
-           let dest_name = source_name ^ "_" ^ Ddf.Fs.rand_bits () in
+           let dest_name = source_name ^ "_" ^ Lib.Fs.rand_bits () in
            {
              dest_path = tmp_dir / dest_name;
              source_name = Filename.basename source_name;
@@ -30,7 +30,7 @@ let run_ddf env prompt items =
   in
   let run_moves =
     List.map (fun entry ->
-        Ddf.Fs.safe_remove ~src:(cwd / entry.source_name) ~dest:entry.dest_path
+        Lib.Fs.safe_remove ~src:(cwd / entry.source_name) ~dest:entry.dest_path
         |> Result.get_ok)
   in
   match prompt with

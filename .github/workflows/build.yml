@@ -10,8 +10,6 @@ jobs:
       fail-fast: false
       matrix:
         os:
-          - macos-latest
-          - windows-latest
           - ubuntu-latest
         ocaml-compiler:
           - "5.1.1"
@@ -27,7 +25,7 @@ jobs:
           cache-prefix: ${{matrix.ocaml-compiler}}-${{matrix.os}}
 
       - name: Install deps from lockfile
-        run: opam install ./lib.opam.locked ./bin.opam.locked ./ddf.opam --deps-only --locked -y
+        run: opam install . --deps-only -y
 
       - name: Build CLI bin
         run: opam exec -- dune build --profile release bin
@@ -36,4 +34,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ddf-${{matrix.ocaml-compiler}}-${{matrix.os}}
-          path: ./_build/default/bin/main.exe
+          path: ./_build/default/bin/ddf.exe

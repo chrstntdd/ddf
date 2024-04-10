@@ -12,40 +12,42 @@ I wanted to try out Ocaml 5 and with the new stable `eio` library. Also, clearin
 ## Setup
 
 1. [Install `opam`](https://opam.ocaml.org/doc/Install.html)
-2. Create a local switch with `opam`
+2. Create a local switch with `opam`. 
    ```sh
-   opam switch create . --locked --deps-only
+   opam switch create . --deps-only
    ```
-3. Install dependencies from the lockfiles.
-   ```sh
-   opam install ./lib.opam.locked ./bin.opam.locked ./ddf.opam --deps-only --locked
-   ```
-4. Build with `dune`
+    This command will read all the `*.opam` files and download all dependencies
+
+3. Build CLI with `dune`
    ```sh
    dune build bin
    ```
-5. Verify `main.exe`
+4. Verify `ddf.exe`
     ```sh
     eza --tree ./_build/default
     ```
     ```sh
-    ./_build/default
-    ├── bin
-    │  ├── main.exe # 👈
-    │  ├── main.ml
-    │  └── main.mli
-    ├── ddf.dune-package
-    ├── ddf.install
-    ├── ddf.opam
-    ├── lib
-    │  ├── ddf.a
-    │  ├── ddf.cma
-    │  ├── ddf.cmxa
-    │  ├── ddf.cmxs
-    │  ├── ddf.ml-gen
-    │  └── fs.ml
-    ├── META.ddf
-    └── README.md
+   ./_build/default
+   ├── bin
+   │  ├── ddf.exe # 👈 
+   │  ├── ddf.ml
+   │  └── ddf.mli
+   ├── ddf.dune-package
+   ├── ddf.install
+   ├── ddf.opam
+   ├── lib
+   │  ├── fs.ml
+   │  ├── lib.a
+   │  ├── lib.cma
+   │  ├── lib.cmxa
+   │  ├── lib.cmxs
+   │  └── lib.ml-gen
+   ├── lib.dune-package
+   ├── lib.install
+   ├── lib.opam
+   ├── META.ddf
+   ├── META.lib
+   └── README.md
     ```
 For production, be sure to include the release flag:
 
