@@ -24,6 +24,9 @@ jobs:
           dune-cache: true
           cache-prefix: ${{matrix.ocaml-compiler}}-${{matrix.os}}
 
+      - name: Install deps ...again?
+        run: opam install . --deps-only -y
+
       - name: Build CLI bin
         run: opam exec -- dune build --profile release bin
 
