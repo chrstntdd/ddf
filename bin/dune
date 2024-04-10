@@ -1,4 +1,5 @@
 (executable
+ (package ddf)
+ (name ddf)
  (public_name ddf)
- (name main)
- (libraries ddf eio_main cmdliner))
+ (libraries lib eio_main cmdliner))

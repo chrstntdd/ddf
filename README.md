@@ -2,7 +2,7 @@
 
 > `d`iscard `d`irectories `f`ast
 
-> [!IMPORTANT] 
+> [!IMPORTANT]
 > `mv`s directories and files to os tmpdir for quick cleanup
 
 ## Why
@@ -13,40 +13,46 @@ I wanted to try out Ocaml 5 and with the new stable `eio` library. Also, clearin
 
 1. [Install `opam`](https://opam.ocaml.org/doc/Install.html)
 2. Create a local switch with `opam`
+
    ```sh
-   opam switch create . --locked --deps-only
+   opam switch create . --deps-only
    ```
-3. Install dependencies from the lockfiles.
+
+   This command will read all the `*.opam` files and download all dependencies
+
+3. Build CLI with `dune` from the local switch
    ```sh
-   opam install ./lib.opam.locked ./bin.opam.locked ./ddf.opam --deps-only --locked
+   opam exec -- dune build bin
    ```
-4. Build with `dune`
+4. Verify `ddf.exe`
    ```sh
-   dune build bin
+   eza --tree ./_build/default
    ```
-5. Verify `main.exe`
-    ```sh
-    eza --tree ./_build/default
-    ```
+
     ```sh
     ./_build/default
     ├── bin
-    │  ├── main.exe # 👈
-    │  ├── main.ml
-    │  └── main.mli
+    │  ├── ddf.exe # 👈
+    │  ├── ddf.ml
+    │  └── ddf.mli
     ├── ddf.dune-package
     ├── ddf.install
     ├── ddf.opam
     ├── lib
-    │  ├── ddf.a
-    │  ├── ddf.cma
-    │  ├── ddf.cmxa
-    │  ├── ddf.cmxs
-    │  ├── ddf.ml-gen
-    │  └── fs.ml
+    │  ├── fs.ml
+    │  ├── lib.a
+    │  ├── lib.cma
+    │  ├── lib.cmxa
+    │  ├── lib.cmxs
+    │  └── lib.ml-gen
+    ├── lib.dune-package
+    ├── lib.install
+    ├── lib.opam
     ├── META.ddf
+    ├── META.lib
     └── README.md
     ```
+
 For production, be sure to include the release flag:
 
 ```sh
