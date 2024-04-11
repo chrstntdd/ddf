@@ -1,5 +1,6 @@
 # `ddf`
 
+[![CI](https://github.com/chrstntdd/ddf/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/chrstntdd/ddf/actions/workflows/build.yml)
 > `d`iscard `d`irectories `f`ast
 
 > [!IMPORTANT]

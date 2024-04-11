@@ -1,4 +1,4 @@
-name: Development CI
+name: CI
 
 on: [push]
 
@@ -29,4 +29,3 @@ jobs:
 
       - name: Build CLI bin
         run: opam exec -- dune build --profile release bin
-
