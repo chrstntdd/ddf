@@ -1,0 +1,8 @@
+(executable
+ (name test)
+ (libraries eio_main alcotest lib))
+
+(rule
+ (alias runtest)
+ (action
+  (run %{dep:test.exe})))
