@@ -26,15 +26,20 @@ let prompt_bool ~stdin file =
   let gather_input () = buf |> Eio.Buf_read.line |> is_confirm_line in
   try gather_input () with Eio.Buf_read.Buffer_limit_exceeded -> false
 
+let setup_ddf ~fs =
+  let ( / ) = Eio.Path.( / ) in
+  let tmp_dir = get_os_tmpdir fs / "ddf" in
+  let () = rand_init None in
+  let () = Eio.Path.mkdirs ~exists_ok:true ~perm:0o700 tmp_dir in
+  tmp_dir
+
 type prompt = Always | Never
 type 'a movable_item = { source_name : string; dest_path : 'a Eio.Path.t }
 
 let run_ddf env prompt items =
   let ( / ) = Eio.Path.( / ) in
   let cwd = Eio.Stdenv.cwd env in
-  let tmp_dir = get_os_tmpdir env#fs / "ddf" in
-  let () = rand_init None in
-  let () = Eio.Path.mkdirs ~exists_ok:true ~perm:0o700 tmp_dir in
+  let tmp_dir = setup_ddf ~fs:env#fs in
   let resources =
     items
     |> List.map (fun source_name ->
