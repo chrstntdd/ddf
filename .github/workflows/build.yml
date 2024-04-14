@@ -27,5 +27,8 @@ jobs:
       - name: Install deps ...again?
         run: opam install . --deps-only -y
 
+      - name: Unit tests
+        run: opam exec -- dune runtest
+
       - name: Build CLI bin
         run: opam exec -- dune build --profile release bin
