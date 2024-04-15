@@ -25,7 +25,7 @@ jobs:
           cache-prefix: ${{matrix.ocaml-compiler}}-${{matrix.os}}
 
       - name: Install deps ...again?
-        run: opam install . --deps-only -y
+        run: opam install . --deps-only --with-test -y
 
       - name: Unit tests
         run: opam exec -- dune runtest
