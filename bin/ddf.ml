@@ -16,13 +16,15 @@ module MainCmd = struct
     in
 
     let cmd =
-      let doc = "Remove files or directories" in
+      let doc =
+        "`mv`s directories and files to `\\$TMPDIR` for quick cleanup"
+      in
       let man =
         [
           `S Manpage.s_description;
           `P
             "$(tname) discards each specified $(i,FILE/DIR) by moving it to a \
-             directory in os_tmpdir, listed below.";
+             directory in `\\$TMPDIR`, listed below.";
           `P ("Discarded $(i,FILE/DIR)s are moved to this directory: " ^ ddf_dir);
           `P
             "To discard a $(i,FILE/DIR) whose name starts with a $(b,-), for \
