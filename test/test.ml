@@ -22,11 +22,11 @@ let test_movable_item cwd () =
   let expected_movable_item =
     {
       Lib.dest_path = tmp_dir / expected_dest_name;
-      Lib.source_name = Filename.basename source_name;
+      Lib.source_name = cwd / source_name |> Eio.Path.native_exn;
     }
   in
   let actual_movable_item =
-    Lib.make_movable ~tmp_dir (fun _ -> mock_bits) source_name
+    Lib.make_movable ~tmp_dir ~cwd (fun _ -> mock_bits) source_name
   in
   let eq a b =
     a.Lib.dest_path |> Eio.Path.native_exn

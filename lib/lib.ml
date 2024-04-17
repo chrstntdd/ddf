@@ -12,7 +12,7 @@ let get_os_tmpdir fs =
 let safe_remove ~src ~dest =
   match Eio.Path.rename src dest with
   | () -> Ok ()
-  | exception Sys_error _ -> Error "unable to move"
+  | exception Sys_error re -> Error re
 
 let is_confirm_line line =
   match line |> String.trim |> String.lowercase_ascii with
@@ -35,13 +35,13 @@ let setup_ddf ~fs =
 
 type 'a movable_item = { source_name : string; dest_path : 'a Eio.Path.t }
 
-let make_movable ~tmp_dir rand_bits source_name =
+let make_movable ~tmp_dir ~cwd rand_bits source_name =
   let ( / ) = Eio.Path.( / ) in
   let dest_name = source_name ^ "_" ^ rand_bits () in
-  {
-    dest_path = tmp_dir / dest_name;
-    source_name = Filename.basename source_name;
-  }
+  let source_name =
+    Option.value (cwd / source_name |> Eio.Path.native) ~default:"Unknown item"
+  in
+  { dest_path = tmp_dir / dest_name; source_name }
 
 type prompt = Always | Never
 
@@ -49,7 +49,7 @@ let run_ddf env prompt items =
   let ( / ) = Eio.Path.( / ) in
   let cwd = Eio.Stdenv.cwd env in
   let tmp_dir = setup_ddf ~fs:env#fs in
-  let map_item = make_movable ~tmp_dir rand_bits in
+  let map_item = make_movable ~tmp_dir ~cwd rand_bits in
   let resources = items |> List.map map_item in
   let run_moves =
     List.map (fun entry ->
