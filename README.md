@@ -17,7 +17,7 @@ The main form of input is a list of directories and/or files as a space separate
 
 For best results, compose with `fd` or `find` to ensure correctly matching items on your file system.
 
-Cleanup node modules across a monorepo
+Cleanup `node_modules` across a monorepo
 
 ```sh
 ddf $(fd -t d -d 3 -a --no-ignore --prune node_modules)
