@@ -9,7 +9,7 @@
 
 ## Why
 
-I wanted to try out Ocaml 5 and with the new stable `eio` library. Also, clearing out `node_modules` and other build artifacts with `rm -rf` takes too long.
+I wanted to try out OCaml 5 and with the new stable `eio` library. Also, clearing out `node_modules` and other build artifacts with `rm -rf` takes too long.
 
 ## Usage
 
