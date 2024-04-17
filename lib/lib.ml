@@ -33,26 +33,27 @@ let setup_ddf ~fs =
   let () = Eio.Path.mkdirs ~exists_ok:true ~perm:0o700 tmp_dir in
   tmp_dir
 
-type prompt = Always | Never
 type 'a movable_item = { source_name : string; dest_path : 'a Eio.Path.t }
+
+let make_movable ~tmp_dir rand_bits source_name =
+  let ( / ) = Eio.Path.( / ) in
+  let dest_name = source_name ^ "_" ^ rand_bits () in
+  {
+    dest_path = tmp_dir / dest_name;
+    source_name = Filename.basename source_name;
+  }
+
+type prompt = Always | Never
 
 let run_ddf env prompt items =
   let ( / ) = Eio.Path.( / ) in
   let cwd = Eio.Stdenv.cwd env in
   let tmp_dir = setup_ddf ~fs:env#fs in
-  let resources =
-    items
-    |> List.map (fun source_name ->
-           let dest_name = source_name ^ "_" ^ rand_bits () in
-           {
-             dest_path = tmp_dir / dest_name;
-             source_name = Filename.basename source_name;
-           })
-  in
+  let map_item = make_movable ~tmp_dir rand_bits in
+  let resources = items |> List.map map_item in
   let run_moves =
     List.map (fun entry ->
-        safe_remove ~src:(cwd / entry.source_name) ~dest:entry.dest_path
-        |> Result.get_ok)
+        safe_remove ~src:(cwd / entry.source_name) ~dest:entry.dest_path)
   in
   match prompt with
   | Never -> run_moves resources |> ignore
