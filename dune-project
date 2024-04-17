@@ -28,4 +28,8 @@
   "cli to `mv` directories and files to os tmpdir for quick cleanup")
  (depends eio_main cmdliner lib))
 
+(package
+ (name test)
+ (allow_empty)
+ (depends eio_main cmdliner lib (alcotest :with-test)))
 ; See the complete stanza docs at https://dune.readthedocs.io/en/stable/dune-files.html#dune-project
