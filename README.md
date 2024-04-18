@@ -4,7 +4,7 @@
 
 > `d`iscard `d`irectories `f`ast
 
-> [!IMPORTANT] 
+> [!IMPORTANT]
 > `mv`s directories and files to `$TMPDIR` for quick cleanup
 
 ## Why
@@ -86,9 +86,10 @@ EXIT STATUS
 
 1. [Install `opam`](https://opam.ocaml.org/doc/Install.html).
 
-   Opam will be used to install dependencies. One such dependency is `dune`, the build tool. 
-   
+   Opam will be used to install dependencies. One such dependency is `dune`, the build tool.
+
    You may have `dune` locally on your own system, but for consistency, we will use `opam exec` to run dune within the context of the local switch.
+
 2. Create a local switch with `opam`
 
    ```sh
@@ -233,11 +234,22 @@ Return to see the output of the help page shown in your terminal.
 From now on you can invoke the binary without all the interruptions.
 
 Link `ddf` on your system $PATH.
-Add the following to your `.bashrc` equivalent. Note that this assumes you have the `ddf` binary in the `/usr/bin/` binary. You may choose a directory of your own choosing.
+
+Note that this assumes you have the `ddf` binary in the `/usr/bin/` directory as such:
+
+```sh
+ eza --tree /usr/bin/
+.
+├── ddf
+```
+
+You may choose a directory of your own choosing.
+
+Add the following to your `.bashrc` equivalent.
 
 ```sh
 export DDF_HOME="/usr/bin/ddf"
-export PATH="$DDF_HOME/bin:$PATH"
+export PATH="$DDF_HOME:$PATH"
 ```
 
 Reload or source and you should now be able to execute `ddf` anywhere in your shell.
