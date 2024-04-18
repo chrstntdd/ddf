@@ -2,8 +2,8 @@ name: Release artifact upload
 
 on:
   push:
-    # branches:
-    #   - main
+    branches:
+      - main
 
 jobs:
   release:
