@@ -4,7 +4,7 @@
 
 > `d`iscard `d`irectories `f`ast
 
-> [!IMPORTANT]
+> [!IMPORTANT] 
 > `mv`s directories and files to `$TMPDIR` for quick cleanup
 
 ## Why
@@ -84,8 +84,11 @@ EXIT STATUS
 
 ## Setup
 
-1. [Install `opam`](https://opam.ocaml.org/doc/Install.html)
-    Opam will be used to install dependencies. One such dependency is `dune`, the build tool. You may have `dune` locally on your own system, but for consistency, we will use `opam exec` to run dune within the context of the local switch.
+1. [Install `opam`](https://opam.ocaml.org/doc/Install.html).
+
+   Opam will be used to install dependencies. One such dependency is `dune`, the build tool. 
+   
+   You may have `dune` locally on your own system, but for consistency, we will use `opam exec` to run dune within the context of the local switch.
 2. Create a local switch with `opam`
 
    ```sh
@@ -174,11 +177,78 @@ If you are consuming the binary from the build artifacts, ensure you allow the `
 chmod +x ddf.exe
 ```
 
+## Installation
+
+### MacOS
+
+Install from release page for your environment. Be mindful of the platform architecture.
+
+> [!IMPORTANT]
+> If you have an M-series Mac, you must download the `*-macos-latest-arm64` build.
+
+On MacOS, extract the binary to a location you prefer, like `usr/bin`.
+
+Rename the file to drop the .exe
+
+```sh
+mv ./ddf.exe ddf
+```
+
+Allow the application to be executable
+
+```sh
+chmod +x ddf
+```
+
+Attempt to run the help page and acknowledge the OS prompt
+
+```sh
+./ddf --help
+```
+
+<div align="center">
+<img style="width: 100%; max-width: 600px; height: auto;" src="./docs/images/macos-0-privacy-and-security-prompt.png"/>
+</div>
+
+Press `Cancel`
+
+Open System Preferences
+
+Scroll down to Security section, allow `ddf`
+
+<div align="center">
+<img style="width: 100%; max-width: 600px; height: auto;" src="./docs/images/macos-1-system-preferences.png" >
+</div>
+
+Attempt to run `ddf` again
+
+Acknowledge, AGAIN that we want to run this program
+
+<div align="center">
+<img style="width: 100%; max-width: 600px; height: auto;" src="./docs/images/macos-2-privacy-and-security-post-prompt.png" />
+</div>
+
+Return to see the output of the help page shown in your terminal.
+
+From now on you can invoke the binary without all the interruptions.
+
+Link `ddf` on your system $PATH.
+Add the following to your `.bashrc` equivalent. Note that this assumes you have the `ddf` binary in the `/usr/bin/` binary. You may choose a directory of your own choosing.
+
+```sh
+export DDF_HOME="/usr/bin/ddf"
+export PATH="$DDF_HOME/bin:$PATH"
+```
+
+Reload or source and you should now be able to execute `ddf` anywhere in your shell.
+
 ## Questions and Answers
+
 ### Where is everything moved to?
+
 The tmp directory is defined via the [OCaml Filename module in the standard library](https://ocaml.org/manual/5.1/api/Filename.html#VALget_temp_dir_name):
 
-> The name of the temporary directory: Under Unix, the value of the `TMPDIR` environment variable, or "/tmp" if the variable is not set. Under Windows, the value of the `TEMP` environment variable, or "." if the variable is not set. The temporary directory can be changed with `Filename.set_temp_dir_name`.
+> The name of the temporary directory: Under Unix, the value of the `TMPDIR` environment variable, or "/tmp" if the variable is not set. Under Windows, the value of the `TEMP` environment variable, or "." if the variable is not set. ..
 
 `ddf` creates a child directory (called "ddf") to use as the destination for all discarded items.
 
