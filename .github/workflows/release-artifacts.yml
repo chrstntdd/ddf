@@ -7,35 +7,37 @@ on:
 
 jobs:
   release:
-    runs-on: ubuntu-latest
-
     strategy:
       fail-fast: false
       matrix:
-        os:
-          - ubuntu-latest
-        ocaml-compiler:
-          - "5.1.1"
+        include:
+          # arm specific build
+          - os: macos-latest
+            arch: arm64
+          - os: ubuntu-latest
+            arch: amd64
+    env:
+      OCAML_VERSION: "5.1.1"
+    runs-on: ${{ matrix.os }}
     steps:
-      - name: Checkout
+      - name: 🆕 Checkout
         uses: actions/checkout@v4
 
-      - name: Set-up OCaml@${{ matrix.ocaml-compiler }}
+      - name: 🐫 Set-up OCaml@${{ env.OCAML_VERSION }}
         uses: ocaml/setup-ocaml@v2
         with:
-          ocaml-compiler: ${{ matrix.ocaml-compiler }}
+          ocaml-compiler: ${{ env.OCAML_VERSION }}
           dune-cache: true
-          cache-prefix: ${{matrix.ocaml-compiler}}-${{matrix.os}}
+          cache-prefix: ${{ env.OCAML_VERSION }}-${{ matrix.os }}-${{ matrix.arch }}
 
-      - name: Install deps ...again?
+      - name: 📦 Install deps with opam
         run: opam install . --deps-only -y
 
-      - name: Build CLI bin
+      - name: 🏜️ Build CLI bin with dune
         run: opam exec -- dune build --profile release bin
 
-      - name: Upload CLI bin
+      - name: 📤 Upload CLI bin
         uses: actions/upload-artifact@v4
         with:
-          name: ddf-${{matrix.ocaml-compiler}}-${{matrix.os}}
+          name: ddf-${{ env.OCAML_VERSION }}-${{ matrix.os }}-${{ matrix.arch }}
           path: ./_build/default/bin/ddf.exe
-
