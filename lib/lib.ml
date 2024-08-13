@@ -96,11 +96,6 @@ module Env_paths = struct
       ]
 end
 
-(* let run_example env = *)
-(*   Eio.traceln "%s" (Env_paths.to_string paths) *)
-(**)
-(* let () = Eio_main.run @@ fun env -> run_example env *)
-
 module Storage = struct
   open Sqlite3
 
@@ -203,13 +198,6 @@ module Storage = struct
 end
 
 let path_to_string x = Option.value (Eio.Path.native x) ~default:"Unknown path"
-let home_dir () = Sys.getenv_opt "HOME"
-
-let rand_init = function
-  | Some seed -> Random.init seed
-  | None -> Random.self_init ()
-
-let rand_bits () = Random.bits () |> Int.to_string
 
 module Rand = struct
   let rand_bits ~secure_random ~length =
@@ -225,11 +213,6 @@ module Rand = struct
   let make_id_generator ~secure_random () =
     generate_random_suffix ~secure_random ~length:16
 end
-
-let get_os_tmpdir fs =
-  let ( / ) = Eio.Path.( / ) in
-  let td = Filename.get_temp_dir_name () in
-  fs / td
 
 module DdfConfig = struct
   type t = { history_dir : string } [@@deriving serialize, deserialize]
@@ -318,54 +301,29 @@ let prompt_bool ~stdin file =
   let gather_input () = buf |> Eio.Buf_read.line |> is_confirm_line in
   try gather_input () with Eio.Buf_read.Buffer_limit_exceeded -> false
 
-let get_ddf_graveyard_dir ~fs =
-  let ( / ) = Eio.Path.( / ) in
-  get_os_tmpdir fs / "ddf"
-
 type ddf_env_deps = {
-  ddf_graveyard_dir : Eio.Fs.dir_ty Eio.Path.t;
-  storage_dir : Eio.Fs.dir_ty Eio.Path.t;
-  home_dir : string;
   ddf_cfg : DdfConfig.t;
-  storage : Undo.storage;
+  db_path : Eio.Fs.dir_ty Eio.Path.t;
+  graveyard_dir : Eio.Fs.dir_ty Eio.Path.t;
 }
 
-let setup_ddf ~fs =
+let init_dirs dirs =
+  List.iter (fun x -> Eio.Path.mkdirs ~exists_ok:true ~perm:0o700 x) dirs
+
+let setup_ddf ~fs ~app_name =
   let ( / ) = Eio.Path.( / ) in
-  let () = rand_init None in
-  let ddf_graveyard_dir = get_ddf_graveyard_dir ~fs in
-  let () = Eio.Path.mkdirs ~exists_ok:true ~perm:0o700 ddf_graveyard_dir in
-  let home_dir = home_dir () |> Option.get in
-  let ddf_config_dir = fs / home_dir / ".config/ddf" in
-  let ddf_config_settings = ddf_config_dir / "settings.json" in
-  let ddf_config_settings = Eio.Path.load ddf_config_settings in
+  let paths = Env_paths.create ~fs app_name in
+  let ddf_config_settings = paths.config / "settings.json" in
+  let db_path = paths.data / (app_name ^ ".db") in
+  let graveyard_dir = paths.temp / (app_name ^ "-graveyard") in
+  let () = init_dirs [ paths.config; graveyard_dir; paths.data ] in
   let ddf_cfg =
-    DdfConfig.from_string_storage ddf_config_settings
+    Eio.Path.load ddf_config_settings
+    |> DdfConfig.from_string_storage
     |> Result.value ~default:(DdfConfig.make ~history_dir:"FALLBACK")
   in
-  let storage_dir = ddf_config_dir / ddf_cfg.history_dir in
-  let storage_file = storage_dir / "db.json" in
-  let () = Eio.Path.mkdirs ~exists_ok:true ~perm:0o700 storage_dir in
-  let initial_storage_state =
-    if Bool.not (Eio.Path.is_file storage_file) then
-      let empty_storage = Undo.make () |> Undo.to_storage in
-      let () = Undo.save storage_file empty_storage |> ignore in
-      empty_storage
-    else
-      let empty_storage =
-        Undo.load storage_file
-        |> Result.value ~default:(Undo.make () |> Undo.to_storage)
-      in
-      empty_storage
-  in
 
-  {
-    ddf_graveyard_dir;
-    home_dir;
-    ddf_cfg;
-    storage_dir;
-    storage = initial_storage_state;
-  }
+  { ddf_cfg; db_path; graveyard_dir }
 
 type 'a movable_item = { source_name : string; dest_path : 'a Eio.Path.t }
 
@@ -382,19 +340,19 @@ let to_moved_item mi : Undo.moved_item =
 
 type prompt = Always | Never
 
-let run_ddf ~(fs : Eio.Fs.dir_ty Eio.Path.t) ~cwd ~stdin prompt items =
+let run_ddf ~(fs : Eio.Fs.dir_ty Eio.Path.t) ~secure_random ~cwd ~stdin
+    ~app_name prompt items =
   let ( / ) = Eio.Path.( / ) in
-  let ddf_env = setup_ddf ~fs in
+  let gen_id_suffix = Rand.make_id_generator ~secure_random in
+  let ddf_env = setup_ddf ~fs ~app_name in
   let map_item =
-    make_movable ~tmp_dir:ddf_env.ddf_graveyard_dir ~cwd rand_bits
+    make_movable ~tmp_dir:ddf_env.graveyard_dir ~cwd gen_id_suffix
   in
   let resources = items |> List.map map_item in
   let run_moves =
     List.map (fun entry ->
         safe_remove ~src:(fs / entry.source_name) ~dest:entry.dest_path)
   in
-  let storage = ddf_env.storage in
-  let _undo = Undo.of_storage storage in
   match prompt with
   | Never -> run_moves resources |> ignore
   | Always ->
@@ -404,18 +362,7 @@ let run_ddf ~(fs : Eio.Fs.dir_ty Eio.Path.t) ~cwd ~stdin prompt items =
                match prompt_bool ~stdin res.source_name with
                | true ->
                    let _x = 0 in
-                   run_moves [ res ]
-                   (* |> List.map (fun res -> *)
-                   (*        res *)
-                   (*        |> Result.map (fun undo_stack -> *)
-                   (*               (* Need to reuse our stack *) *)
-                   (*               let next_stack = Undo.push _undo undo_stack in *)
-                   (*               let next_storage = *)
-                   (*                 Undo.to_storage next_stack *)
-                   (*               in *)
-                   (*               Undo.save storage_path next_storage)) *)
-                   |> ignore
+                   run_moves [ res ] |> ignore
                | false -> print_endline "Skipping...")
       in
-      let () = () in
       ()

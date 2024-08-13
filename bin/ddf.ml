@@ -94,18 +94,14 @@ Like `rm -rf` using `mv` to `\$TMPDIR` for zippier execution
 end
 
 let run_cli env =
-  let cmd_name = "ddf" in
-  let paths = Lib.Env_paths.create ~fs:env#fs cmd_name in
-  let run_ddf =
-    Lib.run_ddf ~fs:env#fs ~stdin:env#stdin ~cwd:(Eio.Stdenv.cwd env)
+  let app_name = "ddf" in
+  let paths = Lib.Env_paths.create ~fs:env#fs app_name in
+  let handle_cli =
+    Lib.run_ddf ~app_name ~fs:env#fs ~stdin:env#stdin ~cwd:(Eio.Stdenv.cwd env)
+      ~secure_random:env#secure_random
   in
   let ddf_dir = Eio.Path.native_exn paths.temp in
-  let main_cmd = MainCmd.run_cli run_ddf ddf_dir in
-  let gen_id_suffix =
-    Lib.Rand.make_id_generator ~secure_random:env#secure_random
-  in
-
-  print_endline ("id: " ^ gen_id_suffix ());
+  let main_cmd = MainCmd.run_cli handle_cli ddf_dir in
 
   exit (Cmdliner.Cmd.eval main_cmd)
 
