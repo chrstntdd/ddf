@@ -1,4 +1,6 @@
 (library
  (name lib)
  (package lib)
- (libraries eio_main))
+ (preprocess
+  (pps serde_derive))
+ (libraries eio_main serde serde_derive serde_json yojson sqlite3))

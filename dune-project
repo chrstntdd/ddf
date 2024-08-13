@@ -19,7 +19,7 @@
  (name lib)
  (synopsis "utils for `ddf` cli")
  (description "Library functions to support `ddf` cli")
- (depends eio_main))
+ (depends eio_main serde serde_derive serde_json))
 
 (package
  (name ddf)
@@ -31,5 +31,10 @@
 (package
  (name test)
  (allow_empty)
- (depends eio_main cmdliner lib (alcotest :with-test)))
+ (depends
+  eio_main
+  cmdliner
+  lib
+  (alcotest :with-test)))
+
 ; See the complete stanza docs at https://dune.readthedocs.io/en/stable/dune-files.html#dune-project
