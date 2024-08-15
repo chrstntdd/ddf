@@ -135,7 +135,7 @@ module Storage = struct
         ()
     | None -> ()
 
-  let insert_operation operation_type source_path destination_path =
+  let insert_operation ~operation_type ~source_path ~destination_path =
     match !db with
     | Some db -> (
         let sql =
@@ -222,71 +222,12 @@ module DdfConfig = struct
   let pp x = Serde_json.to_string serialize_t x
 end
 
-module HistoryStack = struct
-  type 'a stack = Empty | Item of 'a * 'a stack
-
-  let empty = Empty
-  let push x s = Item (x, s)
-  let peek = function Empty -> None | Item (v, _) -> Some v
-  let pop = function Empty -> None | Item (_, s) -> Some s
-end
-
-module Undo = struct
-  (* Represents a successfully moved item *)
-  type moved_item = { source_path : string; ddf_dest_path : string }
-  [@@deriving serialize, deserialize]
-
-  (* Stack of moved items *)
-  type t = moved_item HistoryStack.stack
-
-  (* Separate storage state for serialization. Serde either does not handle recursive variants or i cannot set it up properly *)
-  type storage = { history : moved_item list }
-  [@@deriving serialize, deserialize]
-
-  (* Transform storage into a history stack *)
-  let of_storage (s : storage) : t =
-    let rec aux acc curr = match curr with [] -> acc | xs -> aux acc xs in
-    aux HistoryStack.empty s.history
-
-  let to_storage (x : t) : storage =
-    let rec aux acc curr =
-      match curr with HistoryStack.Empty -> acc | Item (_, xs) -> aux acc xs
-    in
-    let history = aux [] x in
-
-    { history }
-
-  let serialize t = Serde_json.to_string serialize_storage t
-  let deserialize s = Serde_json.of_string deserialize_storage s
-  let make () : t = HistoryStack.empty
-  let make_from_storage = deserialize
-
-  (* Save to storage *)
-  let save dest (s : storage) =
-    let () = Eio.traceln "would be save" in
-    serialize s
-    |> Result.map (fun state_string ->
-           Eio.Path.save ~create:(`Exclusive 0o600) dest state_string)
-
-  let load src =
-    let () = Eio.traceln "loading storage" in
-    let raw_src = Eio.Path.load src in
-    let () = print_endline ("raw source: " ^ raw_src) in
-    raw_src |> make_from_storage
-
-  let push = HistoryStack.push
-  let pop = HistoryStack.pop
-end
+type 'a movable = { source_name : string; dest_path : 'a Eio.Path.t }
+type 'a moved = { source_path : 'a Eio.Path.t; ddf_dest_path : 'a Eio.Path.t }
 
 let safe_remove ~src ~dest =
-  let open Undo in
   match Eio.Path.rename src dest with
-  | () ->
-      Ok
-        {
-          source_path = path_to_string src;
-          ddf_dest_path = path_to_string dest;
-        }
+  | () -> Ok { source_path = src; ddf_dest_path = dest }
   | exception Sys_error re -> Error re
 
 let is_confirm_line line =
@@ -326,24 +267,30 @@ let setup_ddf ~fs ~app_name =
 
   { ddf_cfg; db_path; graveyard_dir }
 
-type 'a movable_item = { source_name : string; dest_path : 'a Eio.Path.t }
-
 let make_movable ~tmp_dir ~cwd rand_bits source_name =
   let ( / ) = Eio.Path.( / ) in
   let dest_name = Filename.basename source_name ^ "_" ^ rand_bits () in
   let source_name = path_to_string (cwd / source_name) in
   { dest_path = tmp_dir / dest_name; source_name }
 
-let to_moved_item mi : Undo.moved_item =
-  let source_path = mi.source_name in
-  let ddf_dest_path = path_to_string mi.dest_path in
-  { source_path; ddf_dest_path }
+let record_successful_moves moves =
+  let record_move { source_path; ddf_dest_path } =
+    match
+      Storage.insert_operation ~operation_type:"moved"
+        ~source_path:(path_to_string source_path)
+        ~destination_path:(path_to_string ddf_dest_path)
+    with
+    | Ok () -> ()
+    | Error err -> Printf.eprintf "Unable to move: %s\n" err
+  in
+  List.iter (function Ok move -> record_move move | Error _ -> ()) moves
 
 type prompt = Always | Never
 
 let run_ddf ~(fs : Eio.Fs.dir_ty Eio.Path.t) ~secure_random ~cwd ~stdin
     ~app_name prompt items =
   let ( / ) = Eio.Path.( / ) in
+
   let gen_id_suffix = Rand.make_id_generator ~secure_random in
   let ddf_env = setup_ddf ~fs ~app_name in
   let map_item =
@@ -355,15 +302,10 @@ let run_ddf ~(fs : Eio.Fs.dir_ty Eio.Path.t) ~secure_random ~cwd ~stdin
         safe_remove ~src:(fs / entry.source_name) ~dest:entry.dest_path)
   in
   match prompt with
-  | Never -> run_moves resources |> ignore
+  | Never -> run_moves resources |> record_successful_moves |> ignore
   | Always ->
-      let _ret =
-        resources
-        |> List.map (fun res ->
-               match prompt_bool ~stdin res.source_name with
-               | true ->
-                   let _x = 0 in
-                   run_moves [ res ] |> ignore
-               | false -> print_endline "Skipping...")
-      in
-      ()
+      resources
+      |> List.iter (fun res ->
+             match prompt_bool ~stdin res.source_name with
+             | true -> run_moves [ res ] |> record_successful_moves |> ignore
+             | false -> print_endline "Skipping...")
