@@ -317,6 +317,7 @@ let setup_ddf ~fs ~app_name =
   let db_path = paths.data / (app_name ^ ".db") in
   let graveyard_dir = paths.temp / (app_name ^ "-graveyard") in
   let () = init_dirs [ paths.config; graveyard_dir; paths.data ] in
+  let () = Storage.init ~db_file:(path_to_string db_path) |> Result.get_ok in
   let ddf_cfg =
     Eio.Path.load ddf_config_settings
     |> DdfConfig.from_string_storage
